@@ -49,6 +49,9 @@ const sendEmail = async (options) => {
     tls: {
       rejectUnauthorized: false,
     },
+    connectionTimeout: 10000,
+    socketTimeout: 10000,
+    greetingTimeout: 10000,
   });
 
   const mailOptions = {
@@ -59,7 +62,12 @@ const sendEmail = async (options) => {
     html: options.html,
   };
 
-  await transporter.sendMail(mailOptions);
+  try {
+    await transporter.sendMail(mailOptions);
+  } catch (error) {
+    console.error('SMTP Email Error:', error);
+    throw error;
+  }
 };
 
 export default sendEmail;

@@ -333,7 +333,7 @@ export const forgotPassword = async (req, res) => {
         message: 'Email sent successfully! Please check your inbox.'
       });
     } catch (err) {
-      console.error("EMAIL SEND ERROR:", err);
+      console.error('SMTP Email Error:', err);
       user.resetPasswordToken = undefined;
       user.resetPasswordExpire = undefined;
       await user.save();
