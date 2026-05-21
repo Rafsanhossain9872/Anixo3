@@ -1,4 +1,4 @@
-const CACHE_NAME = 'anixo-cache-v2';
+const CACHE_NAME = 'anixo-cache-v4';
 
 // Install event - caching basic assets
 self.addEventListener('install', (event) => {
