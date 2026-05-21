@@ -1,16 +1,9 @@
-import { lazy, Suspense, useState, useEffect } from "react";
+import { lazy, Suspense } from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import ScrollToTop from "./components/common/ScrollToTop";
 import PageLoader from "./components/common/PageLoader";
-import MaintenancePage from "./components/MaintenancePage";
-import PrivateGate from "./components/common/PrivateGate";
 import { AdminContextProvider } from "./context/AdminContext";
 import { Loader } from "lucide-react";
-
-function getCookie(name) {
-  const match = document.cookie.split("; ").find((r) => r.startsWith(name + "="));
-  return match ? match.split("=")[1] : null;
-}
 
 const Home             = lazy(() => import("./pages/Home"));
 const Portal           = lazy(() => import("./pages/Portal"));
@@ -75,61 +68,5 @@ function MainAppRouter() {
 }
 
 export default function App() {
-  const isAdmin     = getCookie("bypass_ui") === "true";
-  const isAdminPath = window.location.pathname.startsWith("/admin");
-
-  // Check local storage immediately
-  const hasAccess = localStorage.getItem("private_access_granted") === "true";
-
-  // Default states: LOCKED (fail-closed)
-  const [config, setConfig]   = useState({ maintenanceMode: true, privateMode: true });
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    // Admin users and /admin path bypass all gates
-    if (isAdmin || isAdminPath) {
-      setConfig({ maintenanceMode: false, privateMode: false });
-      setLoading(false);
-      return;
-    }
-
-    fetch("/api/admin/site-config", { cache: "no-store" })
-      .then((r) => {
-        if (!r.ok) throw new Error(`HTTP ${r.status}`);
-        return r.json();
-      })
-      .then((data) => {
-        // Success: update config to real server values
-        setConfig({
-          maintenanceMode: !!data.maintenanceMode,
-          privateMode:     !!data.privateMode,
-          maintenanceData: data.maintenanceData || {},
-          privateMessage:  data.privateMessage  || "",
-        });
-      })
-      .catch(() => {
-        // Error: leave config locked (maintenanceMode: true, privateMode: true)
-      })
-      .finally(() => {
-        setLoading(false);
-      });
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
-
-  // 1. Black screen while checking — zero content leaks
-  if (loading) {
-    return <div style={{ height: "100vh", backgroundColor: "#000" }} />;
-  }
-
-  // 2. Maintenance gate
-  if (config.maintenanceMode) {
-    return <MaintenancePage config={config.maintenanceData || {}} />;
-  }
-
-  // 3. Private gate
-  if (config.privateMode && !hasAccess) {
-    return <PrivateGate message={config.privateMessage} />;
-  }
-
-  // 4. All gates cleared
   return <MainAppRouter />;
 }
