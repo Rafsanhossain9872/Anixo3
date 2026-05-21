@@ -8,8 +8,6 @@ import mongoSanitize from "express-mongo-sanitize";
 // express-mongo-sanitize.sanitize() used directly (Express v5 has getter-only req.query)
 import { logger } from "./lib/logger";
 import { connectDB } from "./lib/db";
-import { readFileSync } from "fs";
-import { join } from "path";
 
 // Import JS routes from backend-core
 // @ts-ignore
@@ -76,49 +74,6 @@ app.use((req: any, _res: any, next: any) => {
 });
 
 app.set("trust proxy", 1);
-
-// ── Admin bypass route (before maintenance middleware) ────────────────────────
-app.get("/api/admin-bypass", (req, res) => {
-  const { key } = req.query as { key?: string };
-  const bypassKey = process.env.ADMIN_BYPASS_KEY;
-
-  if (!bypassKey || key !== bypassKey) {
-    res.status(403).json({ error: "Invalid bypass key." });
-    return;
-  }
-
-  res.cookie("admin_bypass", bypassKey, {
-    httpOnly: true, secure: true, sameSite: "none", maxAge: 7200000,
-  });
-  res.cookie("bypass_ui", "true", {
-    httpOnly: false, secure: true, sameSite: "none", maxAge: 7200000,
-  });
-
-  const origin =
-    req.headers.origin ||
-    req.headers.referer?.split("/").slice(0, 3).join("/") ||
-    "";
-  res.redirect(origin + "/");
-});
-
-// ── Maintenance Middleware ────────────────────────────────────────────────────
-function loadMaintenanceConfig(): Record<string, unknown> {
-  try {
-    const configPath = join(process.cwd(), "../anixo/public/maintenance-config.json");
-    return JSON.parse(readFileSync(configPath, "utf-8"));
-  } catch {
-    return { isMaintenanceActive: false };
-  }
-}
-
-app.use((req, res, next) => {
-  const config = loadMaintenanceConfig();
-  if (!config.isMaintenanceActive) return next();
-  const bypassKey    = process.env.ADMIN_BYPASS_KEY;
-  const bypassCookie = (req as any).cookies?.admin_bypass;
-  if (bypassKey && bypassCookie === bypassKey) return next();
-  res.status(503).json(config);
-});
 
 // ── Routes ────────────────────────────────────────────────────────────────────
 app.use("/api/admin", adminRouter);

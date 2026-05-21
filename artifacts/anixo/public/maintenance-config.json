@@ -1,5 +1,5 @@
 {
-  "isMaintenanceActive": true,
+  "isMaintenanceActive": false,
   "progressPercentage": 46,
   "technicalPointsCount": 24,
   "customMessage": "We are currently importing new premium anime seasons and optimizing database clusters. Expected downtime is 10 minutes. Stay tuned!",
