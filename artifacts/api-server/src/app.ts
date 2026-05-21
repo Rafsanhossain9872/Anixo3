@@ -58,7 +58,27 @@ app.use(
   }),
 );
 
-app.use(cors({ credentials: true, origin: true }));
+const allowedOrigins = [
+  "https://anixo.pages.dev",
+  ...(process.env.FRONTEND_URL
+    ? process.env.FRONTEND_URL.split(",").map((s) => s.trim()).filter(Boolean)
+    : []),
+];
+
+app.use(
+  cors({
+    credentials: true,
+    origin: (origin, callback) => {
+      // Allow requests with no origin (mobile apps, curl, server-to-server)
+      if (!origin) return callback(null, true);
+      // Allow any explicitly listed origin
+      if (allowedOrigins.includes(origin)) return callback(null, true);
+      // In development, allow everything
+      if (process.env.NODE_ENV !== "production") return callback(null, true);
+      callback(new Error(`CORS: origin ${origin} not allowed`));
+    },
+  }),
+);
 app.use(cookieParser());
 
 // ── Body Parsers with 50 kb limit (DDoS / memory-exhaustion prevention) ───────
