@@ -2,7 +2,6 @@ import { lazy, Suspense } from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import ScrollToTop from "./components/common/ScrollToTop";
 import PageLoader from "./components/common/PageLoader";
-import { AdminContextProvider } from "./context/AdminContext";
 import { Loader } from "lucide-react";
 
 const Home             = lazy(() => import("./pages/Home"));
@@ -24,46 +23,42 @@ const Stats            = lazy(() => import("./pages/Stats"));
 const ForgotPassword   = lazy(() => import("./pages/ForgotPassword"));
 const ResetPassword    = lazy(() => import("./pages/ResetPassword"));
 const NotFound         = lazy(() => import("./pages/NotFound"));
-const AdminPage        = lazy(() => import("./pages/Admin/AdminPage"));
 const ContactUs        = lazy(() => import("./pages/ContactUs"));
 
 function MainAppRouter() {
   return (
-    <AdminContextProvider>
-      <Router>
-        <ScrollToTop />
-        <PageLoader />
-        <Suspense fallback={
-          <div className="min-h-screen bg-[#0a0a0a] flex items-center justify-center">
-            <Loader className="w-8 h-8 text-red-600 animate-spin" />
-          </div>
-        }>
-          <Routes>
-            <Route path="/admin"                  element={<AdminPage />} />
-            <Route path="/"                       element={<Portal />} />
-            <Route path="/home"                   element={<Home />} />
-            <Route path="/browse"                 element={<Browse />} />
-            <Route path="/watch/:id"              element={<Watch />} />
-            <Route path="/character/:id"          element={<Character />} />
-            <Route path="/staff/:id"              element={<Staff />} />
-            <Route path="/schedule"               element={<Schedule />} />
-            <Route path="/dmca"                   element={<DMCA />} />
-            <Route path="/terms"                  element={<TermsOfService />} />
-            <Route path="/watchlist"              element={<Watchlist />} />
-            <Route path="/profile"                element={<Profile />} />
-            <Route path="/settings"               element={<Settings />} />
-            <Route path="/watching"               element={<ContinueWatching />} />
-            <Route path="/notifications"          element={<Notifications />} />
-            <Route path="/import"                 element={<ImportExport />} />
-            <Route path="/stats"                  element={<Stats />} />
-            <Route path="/forgot-password"        element={<ForgotPassword />} />
-            <Route path="/reset-password/:token"  element={<ResetPassword />} />
-            <Route path="/contact-us"             element={<ContactUs />} />
-            <Route path="*"                       element={<NotFound />} />
-          </Routes>
-        </Suspense>
-      </Router>
-    </AdminContextProvider>
+    <Router>
+      <ScrollToTop />
+      <PageLoader />
+      <Suspense fallback={
+        <div className="min-h-screen bg-[#0a0a0a] flex items-center justify-center">
+          <Loader className="w-8 h-8 text-red-600 animate-spin" />
+        </div>
+      }>
+        <Routes>
+          <Route path="/"                       element={<Portal />} />
+          <Route path="/home"                   element={<Home />} />
+          <Route path="/browse"                 element={<Browse />} />
+          <Route path="/watch/:id"              element={<Watch />} />
+          <Route path="/character/:id"          element={<Character />} />
+          <Route path="/staff/:id"              element={<Staff />} />
+          <Route path="/schedule"               element={<Schedule />} />
+          <Route path="/dmca"                   element={<DMCA />} />
+          <Route path="/terms"                  element={<TermsOfService />} />
+          <Route path="/watchlist"              element={<Watchlist />} />
+          <Route path="/profile"                element={<Profile />} />
+          <Route path="/settings"               element={<Settings />} />
+          <Route path="/watching"               element={<ContinueWatching />} />
+          <Route path="/notifications"          element={<Notifications />} />
+          <Route path="/import"                 element={<ImportExport />} />
+          <Route path="/stats"                  element={<Stats />} />
+          <Route path="/forgot-password"        element={<ForgotPassword />} />
+          <Route path="/reset-password/:token"  element={<ResetPassword />} />
+          <Route path="/contact-us"             element={<ContactUs />} />
+          <Route path="*"                       element={<NotFound />} />
+        </Routes>
+      </Suspense>
+    </Router>
   );
 }
 

@@ -8,9 +8,7 @@ import {
   getNewReleases,
   getPopularThisSeason,
   getBrowseAnime,
-  getAnimeDetails,
 } from "../services/api";
-import { useAdminConfig } from "../context/AdminContext";
 import Navbar from "../components/layout/Navbar";
 import Footer from "../components/layout/Footer";
 import Hero from "../components/home/Hero";
@@ -26,7 +24,6 @@ import { removeProgress } from "../services/progressService";
 
 export default function Home() {
   const { globalProgress, setGlobalProgress, user } = useAuth();
-  const { heroAnimeId } = useAdminConfig();
   const [activeSeasonTab, setActiveSeasonTab] = useState("All");
   const cardsPerPage = 36;
 
@@ -84,16 +81,7 @@ export default function Home() {
   });
   const trending = trendingData?.media || [];
 
-  const { data: heroAnime } = useQuery({
-    queryKey: ["heroAnime", heroAnimeId],
-    queryFn: () => getAnimeDetails(heroAnimeId),
-    enabled: !!heroAnimeId,
-    staleTime: 1000 * 60 * 30,
-  });
-
-  const heroData = heroAnime
-    ? [heroAnime, ...trending.filter((a) => a.id !== heroAnime.id)]
-    : trending;
+  const heroData = trending;
 
   const { data: popularData, isLoading: loadingPopular } = useQuery({
     queryKey: ["popular"],

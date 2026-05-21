@@ -1,20 +1,12 @@
-import { useAdminConfig } from "../../context/AdminContext";
 import { useAuth } from "../../hooks/useAuth";
 
 /**
  * AdBanner — renders an ad unit for a specific slot.
  * slot: "top" | "mid" | "footer"  (defaults to "top")
- * Returns null when:
- *   - Global adsEnabled is OFF
- *   - This specific slot is disabled in adSlots
- *   - The current user is VIP
  */
 export default function AdBanner({ adClient, adSlot, slot = "top", className = "" }) {
-  const { adsEnabled, adSlots } = useAdminConfig();
   const { user } = useAuth();
 
-  if (!adsEnabled) return null;
-  if (adSlots && adSlots[slot] === false) return null;
   if (user?.isVIP) return null;
 
   return (
