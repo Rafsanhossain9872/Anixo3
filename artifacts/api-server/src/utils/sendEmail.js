@@ -9,50 +9,58 @@ const sendEmail = async (options) => {
     throw new Error('EMAIL_USER and EMAIL_PASS environment variables must be set');
   }
 
-  // Auto-detect SMTP host/port based on EMAIL_USER if not explicitly set
-  let host = process.env.EMAIL_HOST;
-  let port = parseInt(process.env.EMAIL_PORT) || 587;
-  let secure = false;
+  const domain = emailUser.split('@')[1]?.toLowerCase();
 
-  if (!host) {
-    const domain = emailUser.split('@')[1]?.toLowerCase();
-    if (domain === 'gmail.com') {
-      host = 'smtp.gmail.com';
-      port = 587;
-      secure = false;
-    } else if (domain === 'yahoo.com' || domain === 'ymail.com') {
-      host = 'smtp.mail.yahoo.com';
-      port = 465;
-      secure = true;
-    } else if (domain === 'outlook.com' || domain === 'hotmail.com' || domain === 'live.com') {
-      host = 'smtp-mail.outlook.com';
-      port = 587;
-      secure = false;
-    } else {
-      // Generic fallback using Gmail
-      host = 'smtp.gmail.com';
-      port = 587;
-      secure = false;
-    }
+  let transportConfig;
+
+  if (domain === 'gmail.com') {
+    transportConfig = {
+      service: 'gmail',
+      auth: {
+        user: emailUser,
+        pass: emailPass,
+      },
+      connectionTimeout: 10000,
+      socketTimeout: 10000,
+      greetingTimeout: 10000,
+    };
+  } else if (domain === 'yahoo.com' || domain === 'ymail.com') {
+    transportConfig = {
+      host: 'smtp.mail.yahoo.com',
+      port: 465,
+      secure: true,
+      auth: { user: emailUser, pass: emailPass },
+      connectionTimeout: 10000,
+      socketTimeout: 10000,
+      greetingTimeout: 10000,
+    };
+  } else if (domain === 'outlook.com' || domain === 'hotmail.com' || domain === 'live.com') {
+    transportConfig = {
+      host: 'smtp-mail.outlook.com',
+      port: 587,
+      secure: false,
+      auth: { user: emailUser, pass: emailPass },
+      tls: { rejectUnauthorized: false },
+      connectionTimeout: 10000,
+      socketTimeout: 10000,
+      greetingTimeout: 10000,
+    };
   } else {
-    secure = port === 465;
+    const host = process.env.EMAIL_HOST || 'smtp.gmail.com';
+    const port = parseInt(process.env.EMAIL_PORT) || 587;
+    transportConfig = {
+      host,
+      port,
+      secure: port === 465,
+      auth: { user: emailUser, pass: emailPass },
+      tls: { rejectUnauthorized: false },
+      connectionTimeout: 10000,
+      socketTimeout: 10000,
+      greetingTimeout: 10000,
+    };
   }
 
-  const transporter = nodemailer.createTransport({
-    host,
-    port,
-    secure,
-    auth: {
-      user: emailUser,
-      pass: emailPass,
-    },
-    tls: {
-      rejectUnauthorized: false,
-    },
-    connectionTimeout: 10000,
-    socketTimeout: 10000,
-    greetingTimeout: 10000,
-  });
+  const transporter = nodemailer.createTransport(transportConfig);
 
   const mailOptions = {
     from: `AniXo <${emailUser}>`,
