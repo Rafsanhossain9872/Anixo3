@@ -1,83 +1,30 @@
-import nodemailer from 'nodemailer';
-import process from 'node:process';
-
 const sendEmail = async (options) => {
-  const emailUser = process.env.EMAIL_USER;
-  const emailPass = process.env.EMAIL_PASS;
-
-  if (!emailUser || !emailPass) {
-    throw new Error('EMAIL_USER and EMAIL_PASS environment variables must be set');
-  }
-
-  const domain = emailUser.split('@')[1]?.toLowerCase();
-
-  let transportConfig;
-
-  if (domain === 'gmail.com') {
-    transportConfig = {
-      host: 'smtp.gmail.com',
-      port: 587,
-      secure: false,
-      requireTLS: true,
-      family: 4,
-      auth: {
-        user: emailUser,
-        pass: emailPass,
-      },
-      connectionTimeout: 10000,
-      socketTimeout: 10000,
-      greetingTimeout: 10000,
-    };
-  } else if (domain === 'yahoo.com' || domain === 'ymail.com') {
-    transportConfig = {
-      host: 'smtp.mail.yahoo.com',
-      port: 465,
-      secure: true,
-      auth: { user: emailUser, pass: emailPass },
-      connectionTimeout: 10000,
-      socketTimeout: 10000,
-      greetingTimeout: 10000,
-    };
-  } else if (domain === 'outlook.com' || domain === 'hotmail.com' || domain === 'live.com') {
-    transportConfig = {
-      host: 'smtp-mail.outlook.com',
-      port: 587,
-      secure: false,
-      auth: { user: emailUser, pass: emailPass },
-      tls: { rejectUnauthorized: false },
-      connectionTimeout: 10000,
-      socketTimeout: 10000,
-      greetingTimeout: 10000,
-    };
-  } else {
-    const host = process.env.EMAIL_HOST || 'smtp.gmail.com';
-    const port = parseInt(process.env.EMAIL_PORT) || 587;
-    transportConfig = {
-      host,
-      port,
-      secure: port === 465,
-      auth: { user: emailUser, pass: emailPass },
-      tls: { rejectUnauthorized: false },
-      connectionTimeout: 10000,
-      socketTimeout: 10000,
-      greetingTimeout: 10000,
-    };
-  }
-
-  const transporter = nodemailer.createTransport(transportConfig);
-
-  const mailOptions = {
-    from: `AniXo <${emailUser}>`,
-    to: options.email,
+  const url = 'https://api.brevo.com/v3/smtp/email';
+  const payload = {
+    sender: { name: 'Anixo Support', email: process.env.EMAIL_USER },
+    to: [{ email: options.email }],
     subject: options.subject,
-    text: options.message,
-    html: options.html,
+    htmlContent: options.html || options.message
   };
 
   try {
-    await transporter.sendMail(mailOptions);
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'accept': 'application/json',
+        'api-key': process.env.BREVO_API_KEY,
+        'content-type': 'application/json'
+      },
+      body: JSON.stringify(payload)
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      console.error('Brevo API Error:', errorData);
+      throw new Error('Failed to send email via API');
+    }
   } catch (error) {
-    console.error('SMTP Email Error:', error);
+    console.error('Email Dispatch Error:', error);
     throw error;
   }
 };
