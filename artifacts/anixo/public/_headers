@@ -1,0 +1,15 @@
+# index.html — never cache, always fetch fresh
+/index.html
+  Cache-Control: no-store, no-cache, must-revalidate
+
+# Service worker — always fetch fresh so new versions activate immediately
+/sw.js
+  Cache-Control: no-store, no-cache, must-revalidate
+
+# manifest and config files — short cache
+/manifest.json
+  Cache-Control: public, max-age=3600
+
+# JS/CSS/image assets (Vite fingerprints these filenames) — cache aggressively
+/assets/*
+  Cache-Control: public, max-age=31536000, immutable
