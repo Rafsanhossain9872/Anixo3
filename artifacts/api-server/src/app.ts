@@ -95,6 +95,11 @@ app.use((req: any, _res: any, next: any) => {
 
 app.set("trust proxy", 1);
 
+// ── Health check for UptimeRobot ──────────────────────────────────────────────
+app.get('/', (req, res) => {
+  res.status(200).send('Anixo API is awake and running perfectly! 🚀');
+});
+
 // ── Routes ────────────────────────────────────────────────────────────────────
 app.use("/api/admin", adminRouter);
 app.use("/api",       healthRouter);
