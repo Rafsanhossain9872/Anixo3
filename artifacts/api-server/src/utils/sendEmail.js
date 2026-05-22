@@ -16,8 +16,9 @@ const sendEmail = async (options) => {
   if (domain === 'gmail.com') {
     transportConfig = {
       host: 'smtp.gmail.com',
-      port: 465,
-      secure: true,
+      port: 587,
+      secure: false,
+      requireTLS: true,
       family: 4,
       auth: {
         user: emailUser,
