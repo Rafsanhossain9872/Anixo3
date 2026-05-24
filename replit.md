@@ -6,24 +6,31 @@ AniXo is a free anime streaming web app with search, browse, watchlist, watch pr
 
 - `pnpm --filter @workspace/anixo run dev` — run the frontend (port 19704, preview at `/`)
 - `pnpm --filter @workspace/api-server run dev` — run the API server (port 8080)
+- `python3 backup_scraper.py` — run the Python streaming fallback (port 5000)
 - `pnpm run typecheck` — full typecheck across all packages
 - `pnpm run build` — typecheck + build all packages
 - `pnpm --filter @workspace/db run push` — push DB schema changes (dev only)
 - Required env: `DATABASE_URL` — Postgres connection string (scaffold DB, not used by AniXo auth)
 - Required env: `MONGO_URI` — MongoDB connection string for user auth/watchlist/progress
 - Required env: `JWT_SECRET` — secret for signing JWTs
+- Optional env: `CONSUMET_API` — Consumet API base URL (default: `https://api.consumet.org`)
 
 ## Stack
 
 - pnpm workspaces, Node.js 24, TypeScript 5.9
 - Frontend: React 19 + Vite + react-router-dom v7 + TanStack Query
 - API: Express 5 + Pino logging
+- Python fallback: Flask 3 + flask-cors + requests (`backup_scraper.py`, port 5000)
 - Auth DB: MongoDB + Mongoose + bcryptjs + jsonwebtoken
-- External APIs: AniList GraphQL, Jikan (MyAnimeList), Miruro, MalSync, Kitsu
+- External APIs: AniList GraphQL, Jikan (MyAnimeList), Miruro, MalSync, Kitsu, Consumet
 - Build: esbuild (CJS bundle for API)
 
 ## Where things live
 
+- `backup_scraper.py` — Python streaming fallback server (Flask, port 5000)
+  - `GET /api/stream?id=&episode=&lang=sub|dub&type=ani|mal` — called by Express `stream.ts` when MegaPlay fails
+  - Uses Consumet `meta/anilist` as primary, gogoanime name-search as secondary fallback
+  - `requirements.txt` — Python deps (flask, flask-cors, requests, gunicorn)
 - `artifacts/anixo/` — React+Vite frontend
   - `src/services/api.js` — AniList/Jikan API calls, backendApi axios instance
   - `src/services/authService.js` — auth REST calls via backendApi
@@ -65,6 +72,8 @@ _Populate as you build — explicit user instructions worth remembering across s
 - `PYTHON_API` env var (HuggingFace space URL) is the primary proxy for AniList/Jikan — defaults to `https://ritesh0997-index.hf.space`.
 - The `main.jsx` file still exists but is unused (index.html points to main.tsx).
 - Jikan proxy strips leading `/v4` from path params since api.jikan.moe/v4 already includes the version.
+- `backup_scraper.py` runs on port 5000 (hardcoded in `stream.ts` — do not change). The frontend artifact runs on port 19704 via the Replit artifact system. Never hardcode port 5000 in `vite.config.ts`.
+- Consumet's public API (`api.consumet.org`) can be rate-limited or unreliable. Set `CONSUMET_API` env var to a self-hosted Consumet instance for better reliability.
 
 ## Pointers
 
