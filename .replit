@@ -25,10 +25,6 @@ args = "Anixo Frontend"
 task = "workflow.run"
 args = "Anixo Backend"
 
-[[workflows.workflow.tasks]]
-task = "workflow.run"
-args = "Python API"
-
 [[workflows.workflow]]
 name = "Anixo Frontend"
 author = "agent"
@@ -53,18 +49,6 @@ task = "shell.exec"
 args = "PORT=8080 pnpm --filter @workspace/api-server run dev"
 waitForPort = 8080
 
-[[workflows.workflow]]
-name = "Python API"
-author = "agent"
-
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "PORT=9000 python3 backup_scraper.py"
-waitForPort = 9000
-
-[workflows.workflow.metadata]
-outputType = "console"
-
 [agent]
 stack = "FLASK_VANILLA_JS"
 expertMode = true
@@ -76,10 +60,6 @@ timeoutMs = 20000
 [[ports]]
 localPort = 5000
 externalPort = 80
-
-[[ports]]
-localPort = 8080
-externalPort = 8080
 
 [[ports]]
 localPort = 8081
@@ -96,6 +76,10 @@ externalPort = 9000
 [[ports]]
 localPort = 19704
 externalPort = 80
+
+[[ports]]
+localPort = 8080
+externalPort = 8080
 
 [userenv]
 
